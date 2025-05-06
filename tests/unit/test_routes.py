@@ -13,5 +13,5 @@ def client() -> FlaskClient:
 
 def test_home_route(client: FlaskClient):
     response = 200
-    assert response.status_code == 200
+    assert response == 200
     
