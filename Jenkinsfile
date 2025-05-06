@@ -32,10 +32,11 @@ pipeline {
 
         stage('Code Quality') {
             steps {
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 bat '''
-                   call venv\\Scripts\\activate && flake8 app/
-                //    pylint app/
+                   call venv\\Scripts\\activate && flake8 app/ && pylint app/
                 '''
+            }
             }
         }
 
