@@ -7,6 +7,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -17,58 +18,66 @@ pipeline {
             steps {
                 bat '''
                     python -m venv venv
-                    call venv\\Scripts\\activate && pip install -r requirements.txt
+                    call venv\\Scripts\\activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
                 '''
             }
         }
 
         stage('Tests') {
-            parallel (
-            'Unit Tests': {
-                steps {
-                bat '''
-                call venv\\Scripts\\activate && python -m pytest tests/unit
-                '''
+            parallel {
+                stage('Unit Tests') {
+                    steps {
+                        bat '''
+                            call venv\\Scripts\\activate
+                            python -m pytest tests/unit --junitxml=unit_test_results.xml
+                        '''
+                    }
                 }
-            },
-            'Integration Tests': {
-                steps {
-                bat '''
-                call venv\\Scripts\\activate && python -m pytest tests/integration
-                '''
+                stage('Integration Tests') {
+                    steps {
+                        bat '''
+                            call venv\\Scripts\\activate
+                            python -m pytest tests/integration --junitxml=integration_test_results.xml
+                        '''
+                    }
                 }
             }
-            )
         }
 
         stage('Code Quality') {
             steps {
-            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                bat '''
-                   call venv\\Scripts\\activate && flake8 app/
-                '''
-            }
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    bat '''
+                        call venv\\Scripts\\activate
+                        flake8 app/
+                    '''
+                }
             }
         }
 
         stage('Deploy') {
             steps {
                 bat '''
-                    call venv\\Scripts\\activate && python -m gunicorn run:app --bind 0.0.0.0:8000 --daemon
+                    call venv\\Scripts\\activate
+                    python run.py
                 '''
+                // Recommended over Gunicorn on Windows; replace with waitress-serve if needed
             }
         }
     }
 
     post {
         always {
+            echo 'Cleaning up workspace...'
             cleanWs()
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo '✅ Pipeline succeeded!'
         }
         failure {
-            echo 'Pipeline failed!'
+            echo '❌ Pipeline failed.'
         }
     }
 }
