@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Tests') {
             parallel (
                 'Unit Tests': {
                     steps {
@@ -39,13 +39,9 @@ pipeline {
                     }
                 }
             )
-
-            steps {
-                bat '''
-                    call venv\\Scripts\\activate && python -m pytest tests/
-                '''
-            }
         }
+
+            
 
         stage('Code Quality') {
             steps {
