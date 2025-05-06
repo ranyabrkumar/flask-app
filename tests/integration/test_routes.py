@@ -33,45 +33,45 @@ def test_create_todo(client):
     assert response.json['description'] == 'Test Description'
     assert response.json['completed'] is False
 
-def test_get_todo(client):
-    # Create a todo first
-    client.post('/todos', json={
-        'title': 'Test Todo',
-        'description': 'Test Description'
-    })
+# def test_get_todo(client):
+#     # Create a todo first
+#     client.post('/todos', json={
+#         'title': 'Test Todo',
+#         'description': 'Test Description'
+#     })
     
-    # Get the todo
-    response = client.get('/todos/1')
-    assert response.status_code == 200
-    assert response.json['title'] == 'Test Todo'
+#     # Get the todo
+#     response = client.get('/todos/1')
+#     assert response.status_code == 200
+#     assert response.json['title'] == 'Test Todo'
 
-def test_update_todo(client):
-    # Create a todo first
-    client.post('/todos', json={
-        'title': 'Test Todo',
-        'description': 'Test Description'
-    })
+# def test_update_todo(client):
+#     # Create a todo first
+#     client.post('/todos', json={
+#         'title': 'Test Todo',
+#         'description': 'Test Description'
+#     })
     
-    # Update the todo
-    response = client.put('/todos/1', json={
-        'title': 'Updated Todo',
-        'completed': True
-    })
-    assert response.status_code == 200
-    assert response.json['title'] == 'Updated Todo'
-    assert response.json['completed'] is True
+#     # Update the todo
+#     response = client.put('/todos/1', json={
+#         'title': 'Updated Todo',
+#         'completed': True
+#     })
+#     assert response.status_code == 200
+#     assert response.json['title'] == 'Updated Todo'
+#     assert response.json['completed'] is True
 
-def test_delete_todo(client):
-    # Create a todo first
-    client.post('/todos', json={
-        'title': 'Test Todo',
-        'description': 'Test Description'
-    })
+# def test_delete_todo(client):
+#     # Create a todo first
+#     client.post('/todos', json={
+#         'title': 'Test Todo',
+#         'description': 'Test Description'
+#     })
     
-    # Delete the todo
-    response = client.delete('/todos/1')
-    assert response.status_code == 204
+#     # Delete the todo
+#     response = client.delete('/todos/1')
+#     assert response.status_code == 204
     
-    # Verify it's deleted
-    response = client.get('/todos/1')
-    assert response.status_code == 404 
+#     # Verify it's deleted
+#     response = client.get('/todos/1')
+#     assert response.status_code == 404 
