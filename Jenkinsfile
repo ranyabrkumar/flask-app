@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_VERSION = '3.13'
+        PYTHON_VERSION = '3.10'
         FLASK_ENV = 'development'
     }
 
@@ -16,8 +16,8 @@ pipeline {
         stage('Setup Python') {
             steps {
                 bat '''
-                    python3 -m venv venv
-                    call . venv//bin//activate && pip install -r requirements.txt
+                    python -m venv venv
+                    call venv\\Scripts\\activate && pip install -r requirements.txt
                 '''
             }
         }
@@ -25,7 +25,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 bat '''
-                    call . venv//bin//activate && python -m pytest tests/
+                    call venv\\Scripts\\activate && python -m pytest tests/
                 '''
             }
         }
@@ -33,7 +33,7 @@ pipeline {
         stage('Code Quality') {
             steps {
                 bat '''
-                   call . venv//bin//activate && flake8 app/
+                   call venv\\Scripts\\activate && flake8 app/
                 //    pylint app/
                 '''
             }
@@ -42,7 +42,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 bat '''
-                    call . venv//bin//activate && gunicorn app:app
+                    call venv\\Scripts\\activate && gunicorn app:app
                 '''
             }
         }
