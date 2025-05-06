@@ -1,13 +1,23 @@
+@Library('shared-library') _ // Import shared library
+
 node {
     def PYTHON_VERSION = '3.10'
     def FLASK_ENV = 'development'
 
     try {
+        currentBuild.result = 'SUCCESS' // Initialize build result
+        stage('Validate Pipeline') {
+            echo 'Validating pipeline configuration...'
+            validatePipeline() // Shared library function for pipeline validation
+        }
+
         stage('Checkout') {
+            echo 'Checking out source code...'
             checkout scm
         }
 
         stage('Setup Python') {
+            echo 'Setting up Python environment...'
             bat '''
                 python -m venv venv
                 call venv\\Scripts\\activate
@@ -17,9 +27,11 @@ node {
         }
 
         stage('Tests') {
+            echo 'Running tests...'
             parallel(
                 'Unit Tests': {
                     stage('Unit Tests') {
+                        echo 'Running unit tests...'
                         bat '''
                             call venv\\Scripts\\activate
                             python -m pytest tests/unit --junitxml=unit_test_results.xml
@@ -28,6 +40,7 @@ node {
                 },
                 'Integration Tests': {
                     stage('Integration Tests') {
+                        echo 'Running integration tests...'
                         bat '''
                             call venv\\Scripts\\activate
                             python -m pytest tests/integration --junitxml=integration_test_results.xml
@@ -38,6 +51,7 @@ node {
         }
 
         stage('Code Quality') {
+            echo 'Checking code quality...'
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 bat '''
                     call venv\\Scripts\\activate
@@ -47,22 +61,34 @@ node {
         }
 
         stage('Deploy') {
-            bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
-        }
+            echo 'Deploying application...'
+            // bat '''
+            //         call venv\\Scripts\\activate
+            //         start /B gunicorn run:app
+            //     '''
+            example.Pipeline.deployFlaskApp(this) // Call the shared library function to deploy the Flask app
+            }
+    } catch (Exception e) {
+        currentBuild.result = 'FAILURE' // Set build result to FAILURE on error
+        throw e
     } finally {
         stage('Cleanup') {
             echo 'Cleaning up workspace...'
             cleanWs()
         }
     }
-
-    if (currentBuild.result == 'SUCCESS') {
-        emailext subject: 'Build Successful',
-                 body: 'Your build has completed successfully',
-                 to: 'ranyabrkumar@gmail.com'
-    } else if (currentBuild.result == 'FAILURE') {
-        emailext subject: 'Build Failed',
-                 body: 'Your build has failed',
-                 to: 'ranyabrkumar@gmail.com'
+        stage('Post-Build Notifications') {
+            echo 'Sending build notifications...'
+            if (currentBuild.result == 'SUCCESS') {
+                emailext subject: 'Build Successful',
+                         body: 'Your build has completed successfully',
+                         to: 'ranyabrkumar@gmail.com'
+            } else if (currentBuild.result == 'FAILURE') {
+                emailext subject: 'Build Failed',
+                         body: 'Your build has failed',
+                         to: 'ranyabrkumar@gmail.com'
+            }
+        }
     }
 }
+
