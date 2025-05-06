@@ -23,6 +23,23 @@ pipeline {
         }
 
         stage('Run Tests') {
+            parallel (
+                'Unit Tests': {
+                    steps {
+                        bat '''
+                        call venv\\Scripts\\activate && python -m pytest tests/unit
+                        '''
+                    }
+                },
+                'Integration Tests': {
+                    steps {
+                        bat '''
+                        call venv\\Scripts\\activate && python -m pytest tests/integration
+                        '''
+                    }
+                }
+            )
+
             steps {
                 bat '''
                     call venv\\Scripts\\activate && python -m pytest tests/
