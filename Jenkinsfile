@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Tests') {
+        stage('Running Tests') {
             parallel (
                 'Unit Tests': {
                     steps {
