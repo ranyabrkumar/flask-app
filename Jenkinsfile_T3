@@ -1,0 +1,68 @@
+node {
+    def PYTHON_VERSION = '3.10'
+    def FLASK_ENV = 'development'
+
+    try {
+        stage('Checkout') {
+            checkout scm
+        }
+
+        stage('Setup Python') {
+            bat '''
+                python -m venv venv
+                call venv\\Scripts\\activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+            '''
+        }
+
+        stage('Tests') {
+            parallel(
+                'Unit Tests': {
+                    stage('Unit Tests') {
+                        bat '''
+                            call venv\\Scripts\\activate
+                            python -m pytest tests/unit --junitxml=unit_test_results.xml
+                        '''
+                    }
+                },
+                'Integration Tests': {
+                    stage('Integration Tests') {
+                        bat '''
+                            call venv\\Scripts\\activate
+                            python -m pytest tests/integration --junitxml=integration_test_results.xml
+                        '''
+                    }
+                }
+            )
+        }
+
+        stage('Code Quality') {
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                bat '''
+                    call venv\\Scripts\\activate
+                    flake8 app/
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
+        }
+    } finally {
+        stage('Cleanup') {
+            echo 'Cleaning up workspace...'
+            cleanWs()
+        }
+    }
+
+    if (currentBuild.result == 'SUCCESS') {
+        emailext subject: 'Build Successful',
+                 body: 'Your build has completed successfully',
+                 to: 'ranyabrkumar@gmail.com'
+    } else if (currentBuild.result == 'FAILURE') {
+        emailext subject: 'Build Failed',
+                 body: 'Your build has failed',
+                 to: 'ranyabrkumar@gmail.com'
+    }
+}
