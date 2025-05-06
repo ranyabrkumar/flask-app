@@ -72,10 +72,16 @@ pipeline {
             cleanWs()
         }
         success {
-            echo ' Pipeline succeeded!'
-        }
-        failure {
-            echo ' Pipeline failed.'
-        }
+        // Executed only on success
+        emailext subject: 'Build Successful',
+                 body: 'Your build has completed successfully',
+                 to: 'ranyabrkumar@gmail.com'
+    }
+    failure {
+        // Executed only on failure
+        emailext subject: 'Build Failed',
+                 body: 'Your build has failed',
+                 to: 'ranyabrkumar@gmail.com'
+    }
     }
 }
