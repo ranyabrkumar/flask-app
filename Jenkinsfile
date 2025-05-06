@@ -41,6 +41,8 @@ pipeline {
             )
         }
 
+            
+
         stage('Code Quality') {
             steps {
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
@@ -53,9 +55,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                bat '''
-                    call venv\\Scripts\\activate && python -m gunicorn run:app --bind 0.0.0.0:8000 --daemon
-                '''
+                bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
             }
         }
     }
