@@ -22,26 +22,24 @@ pipeline {
             }
         }
 
-        stage('Running Tests') {
+        stage('Tests') {
             parallel (
-                'Unit Tests': {
-                    steps {
-                        bat '''
-                        call venv\\Scripts\\activate && python -m pytest tests/unit
-                        '''
-                    }
-                },
-                'Integration Tests': {
-                    steps {
-                        bat '''
-                        call venv\\Scripts\\activate && python -m pytest tests/integration
-                        '''
-                    }
+            'Unit Tests': {
+                steps {
+                bat '''
+                call venv\\Scripts\\activate && python -m pytest tests/unit
+                '''
                 }
+            },
+            'Integration Tests': {
+                steps {
+                bat '''
+                call venv\\Scripts\\activate && python -m pytest tests/integration
+                '''
+                }
+            }
             )
         }
-
-            
 
         stage('Code Quality') {
             steps {
@@ -55,7 +53,9 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
+                bat '''
+                    call venv\\Scripts\\activate && python -m gunicorn run:app --bind 0.0.0.0:8000 --daemon
+                '''
             }
         }
     }
