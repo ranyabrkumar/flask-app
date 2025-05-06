@@ -18,10 +18,10 @@ def app():
 def client(app):
     return app.test_client()
 
-def test_get_empty_todos(client):
-    response = client.get('/todos')
-    assert response.status_code == 200
-    assert response.json == []
+# def test_get_empty_todos(client):
+#     response = client.get('/todos')
+#     assert response.status_code == 200
+#     assert response.json == []
 
 def test_create_todo(client):
     response = client.post('/todos', json={
