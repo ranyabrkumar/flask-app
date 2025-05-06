@@ -1,75 +1,21 @@
 import pytest
-from app import create_app, db
-from app.models import Todo
+from flask import Flask
+from flask.testing import FlaskClient
+
+from app import create_app  # Assuming your Flask app factory is named `create_app`
 
 @pytest.fixture
-def app():
+def client() -> FlaskClient:
     app = create_app()
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    
-    with app.app_context():
-        db.create_all()
-        yield app
-        db.session.remove()
-        db.drop_all()
+    with app.test_client() as client:
+        yield client
 
-@pytest.fixture
-def client(app):
-    return app.test_client()
+def test_home_route(client: FlaskClient):
+    response = client.get('/')
+    assert response.status_code == 200
+    assert b"Welcome" in response.data  # Replace "Welcome" with expected content
 
-def test_get_empty_todos(client):
-    response = 200
-    assert response == 200
-# def test_create_todo(client):
-#     response = client.post('/todos', json={
-#         'title': 'Test Todo',
-#         'description': 'Test Description'
-#     })
-#     assert response.status_code == 201
-#     assert response.json['title'] == 'Test Todo'
-#     assert response.json['description'] == 'Test Description'
-#     assert response.json['completed'] is False
-
-# def test_get_todo(client):
-#     # Create a todo first
-#     client.post('/todos', json={
-#         'title': 'Test Todo',
-#         'description': 'Test Description'
-#     })
-    
-#     # Get the todo
-#     response = client.get('/todos/1')
-#     assert response.status_code == 200
-#     assert response.json['title'] == 'Test Todo'
-
-# def test_update_todo(client):
-#     # Create a todo first
-#     client.post('/todos', json={
-#         'title': 'Test Todo',
-#         'description': 'Test Description'
-#     })
-    
-#     # Update the todo
-#     response = client.put('/todos/1', json={
-#         'title': 'Updated Todo',
-#         'completed': True
-#     })
-#     assert response.status_code == 200
-#     assert response.json['title'] == 'Updated Todo'
-#     assert response.json['completed'] is True
-
-# def test_delete_todo(client):
-#     # Create a todo first
-#     client.post('/todos', json={
-#         'title': 'Test Todo',
-#         'description': 'Test Description'
-#     })
-    
-#     # Delete the todo
-#     response = client.delete('/todos/1')
-#     assert response.status_code == 204
-    
-#     # Verify it's deleted
-#     response = client.get('/todos/1')
-#     assert response.status_code == 404 
+def test_404_route(client: FlaskClient):
+    response = client.get('/nonexistent')
+    assert response.status_code == 404
