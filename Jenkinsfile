@@ -59,9 +59,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                bat '''
-                    call venv\\Scripts\\activate && gunicorn app:app
-                '''
+                bat 'call %ENV_DIR%\\Scripts\\activate && start /B gunicorn run:app'
             }
         }
     }
