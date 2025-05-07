@@ -1,5 +1,5 @@
 @Library('my-shared-library') _
-// Ensure the shared library 'my-shared-library' is configured in Jenkins' global settings.
+
 node {
     def PYTHON_VERSION = '3.13.2'
     def FLASK_ENV = 'development'
