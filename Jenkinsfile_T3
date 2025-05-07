@@ -1,66 +1,92 @@
+@Library('my-shared-library') _
 node {
     def PYTHON_VERSION = '3.10'
     def FLASK_ENV = 'development'
 
     try {
+        stage('Validate Pipeline') {
+            echo 'Starting Pipeline Validation stage...'
+            bat 'jenkins-linter validate Jenkinsfile_T3 || exit 1'
+            echo 'Pipeline validation completed successfully.'
+        }
+
         stage('Checkout') {
+            echo 'Starting Checkout stage...'
             checkout scm
+            echo 'Completed Checkout stage.'
         }
 
         stage('Setup Python') {
+            echo 'Starting Setup Python stage...'
             bat '''
                 python -m venv venv
                 call venv\\Scripts\\activate
                 pip install --upgrade pip
                 pip install -r requirements.txt
             '''
+            echo 'Completed Setup Python stage.'
         }
 
         stage('Tests') {
+            echo 'Starting Tests stage...'
             parallel(
                 'Unit Tests': {
                     stage('Unit Tests') {
+                        echo 'Starting Unit Tests...'
                         bat '''
                             call venv\\Scripts\\activate
                             python -m pytest tests/unit --junitxml=unit_test_results.xml
                         '''
+                        echo 'Completed Unit Tests.'
                     }
                 },
                 'Integration Tests': {
                     stage('Integration Tests') {
+                        echo 'Starting Integration Tests...'
                         bat '''
                             call venv\\Scripts\\activate
                             python -m pytest tests/integration --junitxml=integration_test_results.xml
                         '''
+                        echo 'Completed Integration Tests.'
                     }
                 }
             )
+            echo 'Completed Tests stage.'
         }
 
         stage('Code Quality') {
+            echo 'Starting Code Quality stage...'
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 bat '''
                     call venv\\Scripts\\activate
                     flake8 app/
                 '''
             }
+            echo 'Completed Code Quality stage.'
         }
 
         stage('Deploy') {
-            bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
+            echo 'Starting Deploy stage...'
+            // bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
+            example.Pipeline.deployFlaskApp(this)
+            echo 'Completed Deploy stage.'
         }
     } finally {
         stage('Cleanup') {
+            echo 'Starting Cleanup stage...'
             echo 'Cleaning up workspace...'
             cleanWs()
+            echo 'Completed Cleanup stage.'
         }
     }
 
     if (currentBuild.result == 'SUCCESS') {
+        echo 'Build was successful.'
         emailext subject: 'Build Successful',
                  body: 'Your build has completed successfully',
                  to: 'ranyabrkumar@gmail.com'
     } else if (currentBuild.result == 'FAILURE') {
+        echo 'Build failed.'
         emailext subject: 'Build Failed',
                  body: 'Your build has failed',
                  to: 'ranyabrkumar@gmail.com'
