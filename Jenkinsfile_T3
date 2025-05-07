@@ -18,13 +18,16 @@ node {
 
         stage('Setup Python') {
             echo 'Starting Setup Python stage...'
+            cache(path: '.venv', key: "python-venv-${PYTHON_VERSION}") {
             bat '''
                 python -m venv venv
                 call venv\\Scripts\\activate
                 pip install --upgrade pip
                 pip install -r requirements.txt
             '''
+            }
             echo 'Completed Setup Python stage.'
+        }
         }
 
         stage('Tests') {

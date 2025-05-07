@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_VERSION = '3.10'
+        PYTHON_VERSION = '3.13.2'
         FLASK_ENV = 'development'
     }
 
