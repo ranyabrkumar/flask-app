@@ -1,4 +1,5 @@
-@Library('my-shared-library') _
+// @Library('my-shared-library') _
+// Ensure the shared library 'my-shared-library' is configured in Jenkins' global settings.
 node {
     def PYTHON_VERSION = '3.13.2'
     def FLASK_ENV = 'development'
@@ -69,9 +70,10 @@ node {
 
         stage('Deploy') {
             echo 'Starting Deploy stage...'
-            script {
-            deployFlaskApp(appPath: "${WORKSPACE}\\app", env: FLASK_ENV)
-            }
+            // script {
+            // deployFlaskApp(appPath: "${WORKSPACE}\\app", env: FLASK_ENV)
+            // }
+             bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
             echo 'Completed Deploy stage.'
         }
     } finally {
