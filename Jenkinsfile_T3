@@ -28,7 +28,6 @@ node {
             }
             echo 'Completed Setup Python stage.'
         }
-        }
 
         stage('Tests') {
             echo 'Starting Tests stage...'
