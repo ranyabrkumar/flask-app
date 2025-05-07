@@ -1,6 +1,6 @@
 @Library('my-shared-library') _
 node {
-    def PYTHON_VERSION = '3.10'
+    def PYTHON_VERSION = '3.13.2'
     def FLASK_ENV = 'development'
 
     try {
@@ -70,8 +70,9 @@ node {
 
         stage('Deploy') {
             echo 'Starting Deploy stage...'
-            // bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
-            example.Pipeline.deployFlaskApp(this)
+            script {
+            deployFlaskApp(appPath: "${WORKSPACE}\\app", env: FLASK_ENV)
+            }
             echo 'Completed Deploy stage.'
         }
     } finally {
