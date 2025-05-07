@@ -71,10 +71,10 @@ node {
 
         stage('Deploy') {
             echo 'Starting Deploy stage...'
-            script {
-            example.Pipeline.deployFlaskApp(appPath: "${WORKSPACE}\\app", env: FLASK_ENV)
-            }
-            //  bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
+            // script {
+            // example.Pipeline.deployFlaskApp(appPath: "${WORKSPACE}\\app", env: FLASK_ENV)
+            // }
+             bat 'call venv\\Scripts\\activate && start /B gunicorn run:app'
             echo 'Completed Deploy stage.'
         }
     } finally {
